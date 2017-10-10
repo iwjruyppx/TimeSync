@@ -2,7 +2,7 @@
 
 <project>
   <fileVersion>2</fileVersion>
-  <fileChecksum>519473193</fileChecksum>
+  <fileChecksum>4190451588</fileChecksum>
   <configuration>
     <name>STM32F4</name>
     <outputs>
@@ -68,11 +68,11 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 18 22 21 19 17 23 16 20 24 25 26</file>
+          <file> 16 32 20 18 37 33 31 24 40 19 36 30 35 17 25 22 26 23 21 34 38</file>
         </tool>
         <tool>
           <name>ICCARM</name>
-          <file> 26 19 18 16 23 24 25 22 21 17 20</file>
+          <file> 26 19 18 16 23 24 25 22 21 17 20 33 36 32 34 30 37 38 31 40</file>
         </tool>
       </inputs>
     </file>
@@ -100,7 +100,7 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 17 30 25 22 18 36 35 38 16 33 32 31 40 20 23 24 19 21 34 37</file>
+          <file> 30 17 36 35 18 16 37 33 32 31 40 20 23 22 21 34 19 24 25 38</file>
         </tool>
         <tool>
           <name>ICCARM</name>

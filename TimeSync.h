@@ -4,7 +4,11 @@
 
 #define MAX_TIMESYNC_SAMPLE         20
 
+#define RELIABLE 0
+#define UNRELIABLE -1
+
 typedef struct {
+    int status;
     int64_t systemTime;
     int64_t referenceTime;
 }StoreTimeInfo_t, *pStoreTimeInfo_t;
@@ -36,6 +40,6 @@ typedef struct TimeSlopH_t{
     double avargeSlop;
 } TimeSlopHandle_t, *pTimeSlopHandle_t;
 
-int timeSlopInit(pTimeSlopHandle_t pHandle, pTimeSyncConfig pConfig);
+int TimeSlopInit(pTimeSlopHandle_t pHandle, pTimeSyncConfig pConfig);
 
 #endif /* __TimeSync_H */

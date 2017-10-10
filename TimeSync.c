@@ -35,7 +35,7 @@ static int slopVerify(struct TimeSlopH_t * pHandle, double slop)
 
 static int syncTimeVerify(struct TimeSlopH_t * pHandle, int64_t preTime, int64_t nowTime)
 {
-    if((nowTime - preTime) >  pHandle->pConfig->minSyncTime)
+    if((nowTime - preTime) <  pHandle->pConfig->minSyncTime)
     {
         LOGE(pHandle, "syncTimeVerify Fail: %d, tolerance %d\n", (int)(nowTime - preTime), (int)pHandle->pConfig->minSyncTime);
         return -1;
@@ -43,11 +43,13 @@ static int syncTimeVerify(struct TimeSlopH_t * pHandle, int64_t preTime, int64_t
     return 0;
 }
 
-static int setTimeToQueue(struct TimeSlopH_t * pHandle, int64_t systemTime, int64_t referenceTime)
+static int setTimeToQueue(struct TimeSlopH_t * pHandle, int64_t systemTime, int64_t referenceTime, int status)
 {
     pStoreTimeInfo_t pdata = &pHandle->data[pHandle->front];
     pdata->systemTime = systemTime;
     pdata->referenceTime = referenceTime;
+    pdata->status= status;
+    pHandle->front = (pHandle->front+1)%MAX_TIMESYNC_SAMPLE;
     
     if(CHECK_OVERWRITE(MAX_TIMESYNC_SAMPLE, pHandle->front, pHandle->rear))
         pHandle->rear = (pHandle->rear+1)%MAX_TIMESYNC_SAMPLE;
@@ -67,6 +69,7 @@ static double getAvageSlop(struct TimeSlopH_t * pHandle)
     double avargeSlop = 0.0f;
     int useSize = GET_USED_SIZE(MAX_TIMESYNC_SAMPLE, pHandle->front, pHandle->rear);
     int i;
+    int counter = 0;
     if(useSize<2)
         return 1.0f;
 
@@ -74,10 +77,19 @@ static double getAvageSlop(struct TimeSlopH_t * pHandle)
     {
         pPredata = getTimeFromQueue(pHandle, i-1);
         pdata = getTimeFromQueue(pHandle, i);
-        tempSlop =  CALCULATE_SLOP((pdata->referenceTime-pPredata->referenceTime), (pdata->systemTime-pPredata->systemTime));
-        avargeSlop+=tempSlop;
+        if(pdata->status == RELIABLE)
+        {
+            tempSlop =  CALCULATE_SLOP((pdata->referenceTime-pPredata->referenceTime), (pdata->systemTime-pPredata->systemTime));
+            avargeSlop+=tempSlop;
+            counter ++;
+        }
     }
-    return avargeSlop = avargeSlop/(useSize-1);
+
+    /*error handle, return perious reliable slop*/
+    if(counter == 0)
+        return pHandle->avargeSlop;
+    
+    return avargeSlop = avargeSlop/counter;
 }
 
 static int resetTimeQueue(struct TimeSlopH_t * pHandle)
@@ -99,11 +111,12 @@ static int inputTime(struct TimeSlopH_t * pHandle, int64_t systemTime, int64_t r
     pStoreTimeInfo_t pPredata = NULL;
     double tempSlop;
     int useSize = GET_USED_SIZE(MAX_TIMESYNC_SAMPLE, pHandle->front, pHandle->rear);
+    int status = RELIABLE;
     
     switch (useSize)
     {
         case 0:
-            setTimeToQueue(pHandle, systemTime, referenceTime);
+            setTimeToQueue(pHandle, systemTime, referenceTime, status);
             break;
         case 1:
             pPredata = getTimeFromQueue(pHandle, (useSize-1));
@@ -115,7 +128,7 @@ static int inputTime(struct TimeSlopH_t * pHandle, int64_t systemTime, int64_t r
             if(slopVerify(pHandle, tempSlop))
                 resetTimeQueue(pHandle);
             
-            setTimeToQueue(pHandle, systemTime, referenceTime);
+            setTimeToQueue(pHandle, systemTime, referenceTime, status);
             break;
         default:
             pPredata = getTimeFromQueue(pHandle, (useSize-1));
@@ -125,9 +138,9 @@ static int inputTime(struct TimeSlopH_t * pHandle, int64_t systemTime, int64_t r
             tempSlop =  CALCULATE_SLOP((referenceTime-pPredata->referenceTime), (systemTime-pPredata->systemTime));
             /*if slop verify fail, maybe initial timestamp something wrong, so reset initial time*/
             if(slopVerify(pHandle, tempSlop))
-                break;
+                status = UNRELIABLE;
             
-            setTimeToQueue(pHandle, systemTime, referenceTime);
+            setTimeToQueue(pHandle, systemTime, referenceTime, status);
             pHandle->avargeSlop = getAvageSlop(pHandle);
             break;
 
@@ -147,13 +160,14 @@ static int reset(struct TimeSlopH_t * pHandle)
     return 0;
 }
 
-int tmeSlopInit(pTimeSlopHandle_t pHandle, pTimeSyncConfig pConfig)
+int TimeSlopInit(pTimeSlopHandle_t pHandle, pTimeSyncConfig pConfig)
 {
     resetTimeQueue(pHandle);
 
     pHandle->inputTime = inputTime;
     pHandle->getSlop = getSlop;
     pHandle->reset = reset;
+    pHandle->pConfig = pConfig;
     return 0;
 }
 

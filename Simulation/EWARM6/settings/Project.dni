@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=1721690095
+Checksum=383546269
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -94,23 +94,6 @@ Fmt13={W}42:output_time	4	0
 Fmt14={W}42:r0	4	0
 Fmt15={W}42:timestamp1111	4	0
 Fmt16={W}42:uRetChipID	4	0
-[DriverProfiling]
-Enabled=0
-Mode=1
-Graph=0
-Symbiont=0
-Exclusions=
-[CallStackLog]
-Enabled=0
-[CallStackStripe]
-ShowTiming=1
-[Log file]
-LoggingEnabled=_ 0
-LogFile=_ ""
-Category=_ 0
-[TermIOLog]
-LoggingEnabled=_ 0
-LogFile=_ ""
 [InterruptLog]
 LogEnabled=0
 GraphEnabled=0
@@ -131,10 +114,11 @@ Bp0=_ 0 "STD_CODE2" "{$PROJ_DIR$\..\..\..\release\System\src\main.c}.147.1" 0 0 
 Bp1=_ 0 "STD_CODE2" "{$PROJ_DIR$\..\..\..\release\System\src\main.c}.100.2" 0 0 1 "" 0 ""
 Bp2=_ 0 "STD_CODE2" "{$PROJ_DIR$\..\..\..\release\System\src\main.c}.90.1" 0 0 1 "" 0 ""
 Bp3=_ 0 "STD_CODE2" "{$PROJ_DIR$\..\..\..\release\System\src\main.c}.15.1" 0 0 1 "" 0 ""
-Bp4=_ 0 "STD_CODE2" "{$PROJ_DIR$\..\..\..\..\..\..\work\Develop\Source\Protocol\CWM_SQL_Protocol_MCU.c}.107.5" 0 0 1 "" 0 ""
+Bp4=_ 0 "STD_CODE2" "{$PROJ_DIR$\..\..\..\..\Develop\Source\Protocol\CWM_SQL_Protocol_MCU.c}.107.5" 0 0 1 "" 0 ""
 Bp5=_ 0 "STD_CODE2" "{$PROJ_DIR$\..\..\..\release\System\src\main.c}.75.7" 0 0 1 "" 0 ""
-Bp6=_ 0 "STD_CODE2" "{$PROJ_DIR$\..\main.c}.7.9" 0 0 1 "" 0 ""
-Count=7
+Bp6=_ 1 "STD_CODE2" "{$PROJ_DIR$\..\..\TimeSync.c}.30.9" 0 0 1 "" 0 ""
+Bp7=_ 1 "STD_CODE2" "{$PROJ_DIR$\..\..\TimeSync.c}.25.9" 0 0 1 "" 0 ""
+Count=8
 [Interrupts]
 Enabled=1
 [MemConfig]
@@ -143,9 +127,26 @@ Manual=0
 Ddf=1
 TypeViol=0
 Stop=1
+[DriverProfiling]
+Enabled=0
+Mode=1
+Graph=0
+Symbiont=0
+Exclusions=
 [Trace1]
 Enabled=0
 ShowSource=1
+[CallStackLog]
+Enabled=0
+[CallStackStripe]
+ShowTiming=1
+[Log file]
+LoggingEnabled=_ 0
+LogFile=_ ""
+Category=_ 0
+[TermIOLog]
+LoggingEnabled=_ 0
+LogFile=_ ""
 [Aliases]
 A0=_ "C:\Users\Paul\Desktop\simulation\TestProject_ContextHub\CWM_ORIAN_STM32F401\main.c" ""
 A1=_ "D:\STMicroelectronics\02-ST ExampleCode\01-STM32_Examples\Project\04-RTOS\FreeRTOS\FreeRTOS_Demo\src\main.c" ""

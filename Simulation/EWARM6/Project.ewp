@@ -328,44 +328,7 @@
         </option>
         <option>
           <name>CCIncludePath2</name>
-          <state>$PROJ_DIR$\..\..\..\Libraries\STM32_Common</state>
-          <state>$PROJ_DIR$\..\..\..\Libraries\STM32F4xx_StdPeriph_Driver\inc</state>
-          <state>$PROJ_DIR$\..\..\..\Libraries\STM32F4xx_HAL_Driver\inc</state>
-          <state>$PROJ_DIR$\..\..\..\Libraries\CMSIS\Device\STM32F4xx\Include</state>
-          <state>$PROJ_DIR$\..\..\..\..\FreeRTOS\FreeRTOS821\Source\include</state>
-          <state>$PROJ_DIR$\..\..\..\..\FreeRTOS\FreeRTOS821\Source\portable\IAR\ARM_CM4F</state>
-          <state>$PROJ_DIR$\..\..\..\Libraries\STM32_CPAL_Driver\inc</state>
-          <state>$PROJ_DIR$\..\..\..\Libraries\STM32_CPAL_Driver\devices\stm32f4xx</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\Algorithm\inc</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\Driver\inc</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\DriverLibrary\AKM8963\inc</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\DriverLibrary\AKM09911\inc</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\DriverLibrary\AKM09911AG\</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\DriverLibrary\AKM09911AG\AKM_HAL</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\DriverLibrary\AKM09911AG\AKM_Library</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\DriverLibrary\AKM09911AG\AKM_Library\libag</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\DriverLibrary\AKM09911AG\AKM_Library\libSmartCompass</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\DriverLibrary\AKM09911AG\AKM_Sensors</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\DriverLibrary\MMC3524xPJ</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\DriverLibrary\ST480M</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\DriverLibrary\Yamaha\inc</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\DriverLibrary\YamahaMini\inc</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\Manager\inc</state>
-          <state>$PROJ_DIR$\..\..\..\..\System\Utils\inc</state>
-          <state>$PROJ_DIR$\..\..\..\Release\Driver\inc</state>
-          <state>$PROJ_DIR$\..\..\..\Release\Manager\inc</state>
-          <state>$PROJ_DIR$\..\..\..\Release\Platform\inc</state>
-          <state>$PROJ_DIR$\..\..\..\Release\RtosTask\inc</state>
-          <state>$PROJ_DIR$\..\..\..\Release\System\inc</state>
-          <state>$PROJ_DIR$\..\..\..\Release\SystemConfig\inc</state>
-          <state>$PROJ_DIR$\..\..\..\..\..\Source\inc</state>
-          <state>$PROJ_DIR$\..\..\..\</state>
-          <state>C:\work\Develop\Source\Manager</state>
-          <state>C:\work\Develop\Source\Common</state>
-          <state>C:\work\Develop\Source\Platform_Dependent</state>
-          <state>C:\work\Develop\Source\Android</state>
-          <state>C:\work\Develop\Source\TimeSync</state>
-          <state>C:\work\Develop\Source\Protocol</state>
+          <state>$PROJ_DIR$\..\..\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
