@@ -10,164 +10,91 @@
 
 #include "TimeSync.h"
 
-#define GET_EMPTY_SIZE(len, front, real) ((front) >=(real)) ? (len-(front-real)) : (real-front)
-#define GET_USED_SIZE(len, front, real) ((front) >=(real)) ? (front-real) : (len-(real-front))
-#define CHECK_OVERWRITE(len, front, real) (((front+1)%len) == real) ? 1 : 0
-#define CALCULATE_SLOP(target, local) (double)target/(double)local
 #define LOGE(pHandle, fmt, args...) \
     if(NULL != pHandle->pConfig->LOG)\
         pHandle->pConfig->LOG(fmt, ##args)
+#define TICKS_DIFF64(prev, cur) ((cur) >= (prev)) ? ((cur)-(prev)) : ((0xFFFFFFFFFFFFFFFF-(prev))+1+(cur))
 
-static int slopVerify(struct TimeSlopH_t * pHandle, double slop)
+static int inputTime(struct TimeSyncH_t *pHandle, int64_t referenceTime)
 {
-    if(slop > (1.0f + pHandle->pConfig->slopMaxTolerance))
-    {
-        LOGE(pHandle, "slopVerify Fail: %f, tolerance %f\n", (float)slop, (float)pHandle->pConfig->slopMaxTolerance);
-        return -1;
-    }
-    if(slop < (1.0f - pHandle->pConfig->slopMaxTolerance))
-    {
-        LOGE(pHandle, "slopVerify Fail: %f, tolerance %f\n", (float)slop, (float)pHandle->pConfig->slopMaxTolerance);
-        return -2;
-    }
-    return 0;
-}
-
-static int syncTimeVerify(struct TimeSlopH_t * pHandle, int64_t preTime, int64_t nowTime)
-{
-    if((nowTime - preTime) <  pHandle->pConfig->minSyncTime)
-    {
-        LOGE(pHandle, "syncTimeVerify Fail: %d, tolerance %d\n", (int)(nowTime - preTime), (int)pHandle->pConfig->minSyncTime);
-        return -1;
-    }
-    return 0;
-}
-
-static int setTimeToQueue(struct TimeSlopH_t * pHandle, int64_t systemTime, int64_t referenceTime, int status)
-{
-    pStoreTimeInfo_t pdata = &pHandle->data[pHandle->front];
-    pdata->systemTime = systemTime;
-    pdata->referenceTime = referenceTime;
-    pdata->status= status;
-    pHandle->front = (pHandle->front+1)%MAX_TIMESYNC_SAMPLE;
+    int64_t offsetDiff = TICKS_DIFF64(pHandle->time.systemTime, referenceTime);
+    pHandle->time.referenceTime = referenceTime;
     
-    if(CHECK_OVERWRITE(MAX_TIMESYNC_SAMPLE, pHandle->front, pHandle->rear))
-        pHandle->rear = (pHandle->rear+1)%MAX_TIMESYNC_SAMPLE;
-    
-    return 0;
-}
-
-static pStoreTimeInfo_t getTimeFromQueue(struct TimeSlopH_t * pHandle, int index)
-{
-    return &pHandle->data[(pHandle->rear + index)%MAX_TIMESYNC_SAMPLE];
-}
-
-static double getAvageSlop(struct TimeSlopH_t * pHandle)
-{
-    pStoreTimeInfo_t pPredata, pdata;
-    double tempSlop;
-    double avargeSlop = 0.0f;
-    int useSize = GET_USED_SIZE(MAX_TIMESYNC_SAMPLE, pHandle->front, pHandle->rear);
-    int i;
-    int counter = 0;
-    if(useSize<2)
-        return 1.0f;
-
-    for(i=1;i<(useSize);i++)
-    {
-        pPredata = getTimeFromQueue(pHandle, i-1);
-        pdata = getTimeFromQueue(pHandle, i);
-        if(pdata->status == RELIABLE)
-        {
-            tempSlop =  CALCULATE_SLOP((pdata->referenceTime-pPredata->referenceTime), (pdata->systemTime-pPredata->systemTime));
-            avargeSlop+=tempSlop;
-            counter ++;
-        }
-    }
-
-    /*error handle, return perious reliable slop*/
-    if(counter == 0)
-        return pHandle->avargeSlop;
-    
-    return avargeSlop = avargeSlop/counter;
-}
-
-static int resetTimeQueue(struct TimeSlopH_t * pHandle)
-{
-    int i;
-    pHandle->front = 0;
-    pHandle->rear= 0;
-    for(i=0;i<MAX_TIMESYNC_SAMPLE;i++)
-    {
-        pHandle->data[i].systemTime = 0ll;
-        pHandle->data[i].referenceTime= 0ll;
-    }
-    return 0;
-}
-
-/*inputRefTime(handle, system timestamp ns, reference timestamp ns)*/
-static int inputTime(struct TimeSlopH_t * pHandle, int64_t systemTime, int64_t referenceTime)
-{
-    pStoreTimeInfo_t pPredata = NULL;
-    double tempSlop;
-    int useSize = GET_USED_SIZE(MAX_TIMESYNC_SAMPLE, pHandle->front, pHandle->rear);
-    int status = RELIABLE;
-    
-    switch (useSize)
+    switch(pHandle->time.status)
     {
         case 0:
-            setTimeToQueue(pHandle, systemTime, referenceTime, status);
-            break;
-        case 1:
-            pPredata = getTimeFromQueue(pHandle, (useSize-1));
-            if(syncTimeVerify(pHandle, pPredata->referenceTime, referenceTime))
-                break;
-            
-            tempSlop =  CALCULATE_SLOP((referenceTime-pPredata->referenceTime), (systemTime-pPredata->systemTime));
-            /*if slop verify fail, maybe initial timestamp something wrong, so reset initial time*/
-            if(slopVerify(pHandle, tempSlop))
-                resetTimeQueue(pHandle);
-            
-            setTimeToQueue(pHandle, systemTime, referenceTime, status);
+            pHandle->time.systemTime = referenceTime;
+            pHandle->bias = 0;
+            LOGE(pHandle, "inputTime init: %d\n", (int)referenceTime);
             break;
         default:
-            pPredata = getTimeFromQueue(pHandle, (useSize-1));
-            if(syncTimeVerify(pHandle, pPredata->referenceTime, referenceTime))
-                break;
-            
-            tempSlop =  CALCULATE_SLOP((referenceTime-pPredata->referenceTime), (systemTime-pPredata->systemTime));
-            /*if slop verify fail, maybe initial timestamp something wrong, so reset initial time*/
-            if(slopVerify(pHandle, tempSlop))
-                status = UNRELIABLE;
-            
-            setTimeToQueue(pHandle, systemTime, referenceTime, status);
-            pHandle->avargeSlop = getAvageSlop(pHandle);
+            if(llabs(offsetDiff) > pHandle->pConfig->offsetMaxTolerance)
+            {
+                pHandle->time.systemTime = referenceTime;
+                pHandle->bias = 0;
+                LOGE(pHandle, "inputTime Fail(offsetMaxTolerance): %d, tolerance %d\n", (int)offsetDiff, (int)pHandle->pConfig->offsetMaxTolerance);
+            }else{
+                pHandle->bias = offsetDiff;
+            }
             break;
-
     }
+    pHandle->time.status++;
     return 0;
 }
 
-static float getSlop(struct TimeSlopH_t * pHandle)
+static int incrementTime(struct TimeSyncH_t *pHandle, int64_t systemTime, double slop)
 {
+    int64_t biasRevised;
+    int64_t timeDiff;
+    
+    if(pHandle->preSyncTime == 0ll)
+        pHandle->preSyncTime = systemTime;
 
-    return (float)pHandle->avargeSlop;
+    timeDiff = (int64_t)((double)(systemTime - pHandle->preSyncTime) * slop);
+    pHandle->preSyncTime = systemTime;
+
+    biasRevised = (int64_t)((double)timeDiff * pHandle->pConfig->biasMaxTolerance);
+
+    if(pHandle->bias > 0)
+    {
+        if(pHandle->bias < biasRevised)
+        {
+            biasRevised = pHandle->bias;
+        }
+        pHandle->bias -= biasRevised;
+    }else{
+        if(llabs(pHandle->bias) < biasRevised)
+        {
+            biasRevised = llabs(pHandle->bias);
+        }
+        pHandle->bias += biasRevised;
+    }
+    
+    pHandle->time.systemTime += (timeDiff + biasRevised);
+    return 0;
 }
 
-static int reset(struct TimeSlopH_t * pHandle)
+static int reset(struct TimeSyncH_t *pHandle, int64_t systemTime, int64_t referenceTime)
 {
 
     return 0;
 }
 
-int TimeSlopInit(pTimeSlopHandle_t pHandle, pTimeSyncConfig pConfig)
+static int64_t getTime(struct TimeSyncH_t *pHandle)
 {
-    resetTimeQueue(pHandle);
+    return pHandle->time.systemTime;
+}
 
-    pHandle->inputTime = inputTime;
-    pHandle->getSlop = getSlop;
-    pHandle->reset = reset;
+int TimeSyncInit(pTimeSyncHandle_t pHandle, pTimeSyncConfig pConfig)
+{
     pHandle->pConfig = pConfig;
+    pHandle->inputTime = inputTime;
+    pHandle->incrementTime = incrementTime;
+    pHandle->reset = reset;
+    pHandle->getTime = getTime;
+    pHandle->time.status = 0;
+    pHandle->time.systemTime = 0ll;
+    pHandle->bias = 0ll;
+    pHandle->preSyncTime = 0ll;
     return 0;
 }
-

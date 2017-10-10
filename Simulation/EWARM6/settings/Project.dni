@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=383546269
+Checksum=-980020795
 [Exceptions]
 StopOnUncaught=_ 0
 StopOnThrow=_ 0
@@ -116,9 +116,7 @@ Bp2=_ 0 "STD_CODE2" "{$PROJ_DIR$\..\..\..\release\System\src\main.c}.90.1" 0 0 1
 Bp3=_ 0 "STD_CODE2" "{$PROJ_DIR$\..\..\..\release\System\src\main.c}.15.1" 0 0 1 "" 0 ""
 Bp4=_ 0 "STD_CODE2" "{$PROJ_DIR$\..\..\..\..\Develop\Source\Protocol\CWM_SQL_Protocol_MCU.c}.107.5" 0 0 1 "" 0 ""
 Bp5=_ 0 "STD_CODE2" "{$PROJ_DIR$\..\..\..\release\System\src\main.c}.75.7" 0 0 1 "" 0 ""
-Bp6=_ 1 "STD_CODE2" "{$PROJ_DIR$\..\..\TimeSync.c}.30.9" 0 0 1 "" 0 ""
-Bp7=_ 1 "STD_CODE2" "{$PROJ_DIR$\..\..\TimeSync.c}.25.9" 0 0 1 "" 0 ""
-Count=8
+Count=6
 [Interrupts]
 Enabled=1
 [MemConfig]

@@ -986,6 +986,9 @@
   <file>
     <name>$PROJ_DIR$\..\..\TimeSync.c</name>
   </file>
+  <file>
+    <name>$PROJ_DIR$\..\..\TimeSyncSlop.c</name>
+  </file>
 </project>
 
 

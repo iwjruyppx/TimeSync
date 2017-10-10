@@ -14,22 +14,35 @@ int64_t referTimestamp = 0ll;
 
 float testSlop = 1.0f;
 
-int64_t getTimestamp(void)
+float currentSlop;
+
+static int slopCallback(double slop)
+{
+    currentSlop = slop;
+    printf("slop update %f", (float)slop);
+    return 0;
+}
+
+static int64_t getTimestamp(void)
 {
     return timestamp;
 }
 
-static void SlopModuleInit(void)
+static void timeSyncModuleInit(void)
 {
-    SlopConfigHandle.minSyncTime = 5000000000ll;
+    SlopConfigHandle.minSyncTime = 5*NS;
     SlopConfigHandle.slopMaxTolerance = 0.1f;
     SlopConfigHandle.LOG = printf;
     SlopConfigHandle.getTimestamp = getTimestamp;
+    SlopConfigHandle.avargeSlopCallback = slopCallback;
     TimeSlopInit (&SlopHandle, &SlopConfigHandle);
+
+    SlopConfigHandle.offsetMaxTolerance = 2*NS;
+    SlopConfigHandle.biasMaxTolerance = 0.1f;
 }
  int main( void )
 {
-    SlopModuleInit();
+    timeSyncModuleInit();
     while(1)
     {
         SlopHandle.inputTime(&SlopHandle, timestamp, referTimestamp);
