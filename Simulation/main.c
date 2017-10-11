@@ -2,12 +2,16 @@
 #include "TimeSync.h"
 
 TimeSlopHandle_t SlopHandle;
-TimeSyncConfig SlopConfigHandle;
+TimeSyncConfig TimeSyncConfigHandle;
+
+TimeSyncHandle_t TimeSyncHandle;
+
 int64_t timestamp = 0ll;
 int64_t referTimestamp = 0ll;
 
 #define NS (int64_t)1000000000ll
-#define TIME_DIFF (int64_t)(1*NS)
+#define US (int64_t)1000000ll
+#define TIME_DIFF (int64_t)(10*US)
 #define F_DIFF(data, a, b) (data >= a && data< b) ? 1:0
 
 #define GET_EMPTY_SIZE(len, front, real) ((front) >=(real)) ? (len-(front-real)) : (real-front)
@@ -30,22 +34,24 @@ static int64_t getTimestamp(void)
 
 static void timeSyncModuleInit(void)
 {
-    SlopConfigHandle.minSyncTime = 5*NS;
-    SlopConfigHandle.slopMaxTolerance = 0.1f;
-    SlopConfigHandle.LOG = printf;
-    SlopConfigHandle.getTimestamp = getTimestamp;
-    SlopConfigHandle.avargeSlopCallback = slopCallback;
-    TimeSlopInit (&SlopHandle, &SlopConfigHandle);
+    TimeSyncConfigHandle.minSyncTime = 5*NS;
+    TimeSyncConfigHandle.slopMaxTolerance = 0.1f;
+    TimeSyncConfigHandle.LOG = printf;
+    TimeSyncConfigHandle.getTimestamp = getTimestamp;
+    TimeSyncConfigHandle.avargeSlopCallback = slopCallback;
+    TimeSlopInit (&SlopHandle, &TimeSyncConfigHandle);
 
-    SlopConfigHandle.offsetMaxTolerance = 2*NS;
-    SlopConfigHandle.biasMaxTolerance = 0.1f;
+    TimeSyncConfigHandle.offsetMaxTolerance = 2*NS;
+    TimeSyncConfigHandle.biasMaxTolerance = 0.1f;
+    
+    TimeSyncInit (&TimeSyncHandle, &TimeSyncConfigHandle);
 }
  int main( void )
 {
+    int64_t preTimesyncTime = 0;
     timeSyncModuleInit();
     while(1)
     {
-        SlopHandle.inputTime(&SlopHandle, timestamp, referTimestamp);
         timestamp += TIME_DIFF;
         if(timestamp < 100*NS)
             referTimestamp += (TIME_DIFF);
@@ -71,6 +77,16 @@ static void timeSyncModuleInit(void)
             referTimestamp += (TIME_DIFF*testSlop);
             testSlop += 0.000001f;
         }
+        
+        if(referTimestamp > preTimesyncTime)
+        {
+            SlopHandle.inputTime(&SlopHandle, timestamp, referTimestamp);
+            TimeSyncHandle.inputTime(&TimeSyncHandle, referTimestamp);
+            
+            preTimesyncTime = referTimestamp + SlopHandle.pConfig->minSyncTime;
+        }
+        TimeSyncHandle.incrementTime(&TimeSyncHandle, timestamp, SlopHandle.getSlop(&SlopHandle));
+        
     }
 }
 

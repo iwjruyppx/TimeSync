@@ -151,7 +151,7 @@ static int inputTime(struct TimeSlopH_t * pHandle, int64_t systemTime, int64_t r
     return status;
 }
 
-static float getSlop(struct TimeSlopH_t * pHandle)
+static double getSlop(struct TimeSlopH_t * pHandle)
 {
 
     return (float)pHandle->avargeSlop;

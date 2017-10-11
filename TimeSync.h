@@ -38,7 +38,7 @@ typedef struct TimeSlopH_t{
     /*inputRefTime(handle, system timestamp ns, reference timestamp ns)*/
     int (*inputTime)(struct TimeSlopH_t *, int64_t, int64_t);
     /*inputRefTime(handle, reference timestamp ns, sync timestamp ns)*/
-    float (*getSlop)(struct TimeSlopH_t *);
+    double (*getSlop)(struct TimeSlopH_t *);
     int (*reset)(struct TimeSlopH_t *);
     
     pTimeSyncConfig pConfig;
