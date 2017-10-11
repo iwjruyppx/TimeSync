@@ -73,7 +73,7 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 16 36 20 18 41 37 35 24 44 19 40 34 39 17 25 22 26 23 21 38 42</file>
+          <file> 36 20 18 38 22 21 37 35 16 23 44 19 40 34 39 17 41 26 24 25 42</file>
         </tool>
         <tool>
           <name>ICCARM</name>
@@ -105,7 +105,7 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 18 34 42 16 40 39 17 25 22 37 36 35 44 20 24 19 23 21 38 41</file>
+          <file> 23 17 34 18 16 40 39 21 38 37 36 35 44 20 22 41 19 24 25 42</file>
         </tool>
         <tool>
           <name>ICCARM</name>

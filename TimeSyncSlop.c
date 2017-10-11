@@ -118,34 +118,34 @@ static int inputTime(struct TimeSlopH_t * pHandle, int64_t systemTime, int64_t r
     
     switch (useSize)
     {
-        case 0:
-            setTimeToQueue(pHandle, systemTime, referenceTime, status);
+    case 0:
+        setTimeToQueue(pHandle, systemTime, referenceTime, status);
+        break;
+    case 1:
+        pPredata = getTimeFromQueue(pHandle, (useSize-1));
+        if(syncTimeVerify(pHandle, pPredata->referenceTime, referenceTime))
             break;
-        case 1:
-            pPredata = getTimeFromQueue(pHandle, (useSize-1));
-            if(syncTimeVerify(pHandle, pPredata->referenceTime, referenceTime))
-                break;
-            
-            tempSlop =  CALCULATE_SLOP((referenceTime-pPredata->referenceTime), (systemTime-pPredata->systemTime));
-            /*if slop verify fail, maybe initial timestamp something wrong, so reset initial time*/
-            if(slopVerify(pHandle, tempSlop))
-                resetTimeQueue(pHandle);
-            
-            setTimeToQueue(pHandle, systemTime, referenceTime, status);
+        
+        tempSlop =  CALCULATE_SLOP((referenceTime-pPredata->referenceTime), (systemTime-pPredata->systemTime));
+        /*if slop verify fail, maybe initial timestamp something wrong, so reset initial time*/
+        if(slopVerify(pHandle, tempSlop))
+            resetTimeQueue(pHandle);
+        
+        setTimeToQueue(pHandle, systemTime, referenceTime, status);
+        break;
+    default:
+        pPredata = getTimeFromQueue(pHandle, (useSize-1));
+        if(syncTimeVerify(pHandle, pPredata->referenceTime, referenceTime))
             break;
-        default:
-            pPredata = getTimeFromQueue(pHandle, (useSize-1));
-            if(syncTimeVerify(pHandle, pPredata->referenceTime, referenceTime))
-                break;
-            
-            tempSlop =  CALCULATE_SLOP((referenceTime-pPredata->referenceTime), (systemTime-pPredata->systemTime));
-            /*if slop verify fail, maybe initial timestamp something wrong, so reset initial time*/
-            if(slopVerify(pHandle, tempSlop))
-                status = UNRELIABLE;
-            
-            setTimeToQueue(pHandle, systemTime, referenceTime, status);
-            pHandle->avargeSlop = getAvageSlop(pHandle);
-            break;
+        
+        tempSlop =  CALCULATE_SLOP((referenceTime-pPredata->referenceTime), (systemTime-pPredata->systemTime));
+        /*if slop verify fail, maybe initial timestamp something wrong, so reset initial time*/
+        if(slopVerify(pHandle, tempSlop))
+            status = UNRELIABLE;
+        
+        setTimeToQueue(pHandle, systemTime, referenceTime, status);
+        pHandle->avargeSlop = getAvageSlop(pHandle);
+        break;
 
     }
     return status;

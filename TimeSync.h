@@ -55,8 +55,8 @@ int TimeSlopInit(pTimeSlopHandle_t pHandle, pTimeSyncConfig pConfig);
 /********** TimeSync *******************/
 /************************************************************/
 typedef struct TimeSyncH_t{
-    /*inputRefTime(handle, reference timestamp ns)*/
-    int (*inputTime)(struct TimeSyncH_t *, int64_t);
+    /*inputRefTime(handle, system timestamp ns, reference timestamp ns, slop)*/
+    int (*inputTime)(struct TimeSyncH_t *, int64_t, int64_t, double);
     /*incrementTime(handle, system timestamp ns, slop)*/
     int (*incrementTime)(struct TimeSyncH_t *, int64_t, double);
     /*inputRefTime(handle, system timestamp ns, reference timestamp ns)*/
@@ -67,6 +67,7 @@ typedef struct TimeSyncH_t{
     StoreTimeInfo_t time;
     int64_t bias;
     int64_t preSyncTime;
+    int64_t syncSysTime;
 } TimeSyncHandle_t, *pTimeSyncHandle_t;
 /************************************************************/
 int TimeSyncInit(pTimeSyncHandle_t pHandle, pTimeSyncConfig pConfig);

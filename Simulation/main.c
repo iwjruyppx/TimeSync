@@ -23,7 +23,7 @@ float currentSlop;
 static int slopCallback(double slop)
 {
     currentSlop = slop;
-    printf("slop update %f", (float)slop);
+//    printf("slop update %f\n", (float)slop);
     return 0;
 }
 
@@ -35,7 +35,7 @@ static int64_t getTimestamp(void)
 static void timeSyncModuleInit(void)
 {
     TimeSyncConfigHandle.minSyncTime = 5*NS;
-    TimeSyncConfigHandle.slopMaxTolerance = 0.1f;
+    TimeSyncConfigHandle.slopMaxTolerance = 0.5f;
     TimeSyncConfigHandle.LOG = printf;
     TimeSyncConfigHandle.getTimestamp = getTimestamp;
     TimeSyncConfigHandle.avargeSlopCallback = slopCallback;
@@ -53,6 +53,10 @@ static void timeSyncModuleInit(void)
     while(1)
     {
         timestamp += TIME_DIFF;
+#if 1
+        referTimestamp += (TIME_DIFF*testSlop);
+        testSlop += 0.000001f;
+#else
         if(timestamp < 100*NS)
             referTimestamp += (TIME_DIFF);
         else  if(F_DIFF(timestamp, 100*NS, 200*NS))
@@ -77,15 +81,19 @@ static void timeSyncModuleInit(void)
             referTimestamp += (TIME_DIFF*testSlop);
             testSlop += 0.000001f;
         }
+#endif
         
         if(referTimestamp > preTimesyncTime)
         {
             SlopHandle.inputTime(&SlopHandle, timestamp, referTimestamp);
-            TimeSyncHandle.inputTime(&TimeSyncHandle, referTimestamp);
             
             preTimesyncTime = referTimestamp + SlopHandle.pConfig->minSyncTime;
         }
+        TimeSyncHandle.inputTime(&TimeSyncHandle, timestamp, referTimestamp, SlopHandle.getSlop(&SlopHandle));
         TimeSyncHandle.incrementTime(&TimeSyncHandle, timestamp, SlopHandle.getSlop(&SlopHandle));
+
+        if(llabs((referTimestamp-TimeSyncHandle.getTime(&TimeSyncHandle))) >1*US)
+            printf("%lld, %lld, diff:%lld\n", referTimestamp, TimeSyncHandle.getTime(&TimeSyncHandle), (referTimestamp-TimeSyncHandle.getTime(&TimeSyncHandle))/1000ll);
         
     }
 }
