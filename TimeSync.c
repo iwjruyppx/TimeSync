@@ -23,6 +23,7 @@ static int inputTime(struct TimeSyncH_t *pHandle, int64_t referenceTime)
     switch(pHandle->time.status)
     {
         case 0:
+            /*System initial*/
             pHandle->time.systemTime = referenceTime;
             pHandle->bias = 0;
             LOGE(pHandle, "inputTime init: %d\n", (int)referenceTime);
@@ -47,14 +48,18 @@ static int incrementTime(struct TimeSyncH_t *pHandle, int64_t systemTime, double
     int64_t biasRevised;
     int64_t timeDiff;
     
+    /*Initial pre system timestamp*/
     if(pHandle->preSyncTime == 0ll)
         pHandle->preSyncTime = systemTime;
 
+    /*Calculate system timediff */
     timeDiff = (int64_t)((double)(systemTime - pHandle->preSyncTime) * slop);
     pHandle->preSyncTime = systemTime;
 
+    /*Calculate max bias revised*/
     biasRevised = (int64_t)((double)timeDiff * pHandle->pConfig->biasMaxTolerance);
 
+    /*system time calculate*/
     if(pHandle->bias > 0)
     {
         if(pHandle->bias < biasRevised)
@@ -62,15 +67,16 @@ static int incrementTime(struct TimeSyncH_t *pHandle, int64_t systemTime, double
             biasRevised = pHandle->bias;
         }
         pHandle->bias -= biasRevised;
+        pHandle->time.systemTime += (timeDiff + biasRevised);
     }else{
         if(llabs(pHandle->bias) < biasRevised)
         {
             biasRevised = llabs(pHandle->bias);
         }
         pHandle->bias += biasRevised;
+        pHandle->time.systemTime += (timeDiff - biasRevised);
     }
     
-    pHandle->time.systemTime += (timeDiff + biasRevised);
     return 0;
 }
 
